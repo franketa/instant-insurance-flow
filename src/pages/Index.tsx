@@ -9,63 +9,145 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 
 interface FormData {
+  // Contact Information
   zipCode: string;
+  firstName: string;
+  lastName: string;
+  address1: string;
+  city: string;
+  state: string;
+  emailAddress: string;
+  phoneNumber: string;
+  secondaryPhone: string;
+  residenceStatus: string;
+  occupancyDate: string;
+  
+  // Vehicle Information
   vehicleCount: number;
-  vehicleYear: string;
-  vehicleMake: string;
-  vehicleModel: string;
-  hasRecentInsurance: boolean;
-  currentInsurer: string;
-  insuranceLength: string;
-  coverageNeeded: string;
-  personalInfo: {
+  vehicles: Array<{
+    year: string;
+    make: string;
+    model: string;
+    submodel: string;
+    vinPrefix: string;
+    locationParked: string;
+    ownedOrLeased: string;
+    vehicleUse: string;
+    annualMiles: string;
+    weeklyCommuteDays: string;
+    oneWayDistance: string;
+  }>;
+  
+  // Driver Information
+  drivers: Array<{
+    gender: string;
+    maritalStatus: string;
+    relationshipToApplicant: string;
     firstName: string;
     lastName: string;
-    email: string;
-    phone: string;
-  };
+    birthDate: string;
+    state: string;
+    ageLicensed: string;
+    licenseStatus: string;
+    licenseEverSuspended: string;
+    occupation: string;
+    occupationYears: string;
+    isStudent: string;
+    education: string;
+    requiresSR22: string;
+    creditRating: string;
+    hasMilitaryAffiliation: string;
+  }>;
+  
+  // Incidents
+  hasIncidents: boolean;
+  incidents: Array<{
+    atFault: string;
+    type: string;
+    duiState: string;
+    incidentDate: string;
+    insurancePaid: string;
+    whatDamaged: string;
+  }>;
+  
+  // Insurance Profile
+  coverageType: string;
+  hasCurrentInsurance: boolean;
+  currentInsurer: string;
+  expirationDate: string;
+  startDate: string;
+  continuouslyInsuredSince: string;
 }
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    // Contact
     zipCode: '',
+    firstName: '',
+    lastName: '',
+    address1: '',
+    city: '',
+    state: '',
+    emailAddress: '',
+    phoneNumber: '',
+    secondaryPhone: '',
+    residenceStatus: '',
+    occupancyDate: '',
+    
+    // Vehicle
     vehicleCount: 1,
-    vehicleYear: '',
-    vehicleMake: '',
-    vehicleModel: '',
-    hasRecentInsurance: false,
-    currentInsurer: '',
-    insuranceLength: '',
-    coverageNeeded: '',
-    personalInfo: {
+    vehicles: [{
+      year: '',
+      make: '',
+      model: '',
+      submodel: '',
+      vinPrefix: '',
+      locationParked: '',
+      ownedOrLeased: '',
+      vehicleUse: '',
+      annualMiles: '',
+      weeklyCommuteDays: '',
+      oneWayDistance: ''
+    }],
+    
+    // Drivers
+    drivers: [{
+      gender: '',
+      maritalStatus: '',
+      relationshipToApplicant: 'Self',
       firstName: '',
       lastName: '',
-      email: '',
-      phone: ''
-    }
+      birthDate: '',
+      state: '',
+      ageLicensed: '',
+      licenseStatus: '',
+      licenseEverSuspended: '',
+      occupation: '',
+      occupationYears: '',
+      isStudent: '',
+      education: '',
+      requiresSR22: '',
+      creditRating: '',
+      hasMilitaryAffiliation: ''
+    }],
+    
+    // Incidents
+    hasIncidents: false,
+    incidents: [],
+    
+    // Insurance
+    coverageType: '',
+    hasCurrentInsurance: false,
+    currentInsurer: '',
+    expirationDate: '',
+    startDate: '',
+    continuouslyInsuredSince: ''
   });
 
-  const totalSteps = 8;
+  const totalSteps = 15; // Expanded to accommodate all sections
   const progress = (currentStep / totalSteps) * 100;
-
-  const vehicleMakes = [
-    'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Dodge', 'Ford', 'GMC',
-    'Honda', 'Hyundai', 'Jeep', 'Kia', 'Lexus', 'Lincoln', 'Nissan', 'Ram',
-    'Subaru', 'Toyota', 'Volkswagen'
-  ];
-
-  const bmwModels = [
-    '228i', '228Xi', '230i', '230Xi', '330E', '330i', '330XE', '330Xi',
-    '430i', '430Xi', '530', '530E'
-  ];
-
-  const insurers = [
-    'Allstate', 'American Family', 'Farmers Ins', 'GEICO', 'The General',
-    'Liberty Mutual', 'Nationwide', 'Progressive', 'Root', 'State Farm',
-    'Travelers', 'USAA'
-  ];
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -81,7 +163,6 @@ const Index = () => {
 
   const handleSubmit = async () => {
     try {
-      // Placeholder webhook URL - replace with actual webhook
       const webhookUrl = 'https://webhook.site/your-unique-id';
       
       const response = await fetch(webhookUrl, {
@@ -111,13 +192,21 @@ const Index = () => {
     }));
   };
 
-  const updatePersonalInfo = (field: string, value: string) => {
+  const updateVehicle = (index: number, field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      personalInfo: {
-        ...prev.personalInfo,
-        [field]: value
-      }
+      vehicles: prev.vehicles.map((vehicle, i) => 
+        i === index ? { ...vehicle, [field]: value } : vehicle
+      )
+    }));
+  };
+
+  const updateDriver = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      drivers: prev.drivers.map((driver, i) => 
+        i === index ? { ...driver, [field]: value } : driver
+      )
     }));
   };
 
@@ -196,9 +285,10 @@ const Index = () => {
       <div className="flex-1 p-4">
         <div className="max-w-2xl mx-auto">
           <Card className="p-8">
+            {/* Step 1: ZIP Code */}
             {currentStep === 1 && (
               <div className="text-center space-y-6">
-                <h1 className="text-2xl font-bold text-gray-900">Enter zip code</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Enter your ZIP code</h1>
                 <div className="max-w-sm mx-auto space-y-4">
                   <Input
                     type="text"
@@ -218,6 +308,7 @@ const Index = () => {
               </div>
             )}
 
+            {/* Step 2: Vehicle Count */}
             {currentStep === 2 && (
               <div className="text-center space-y-6">
                 <h1 className="text-2xl font-bold text-gray-900">How many vehicles will be on your policy?</h1>
@@ -239,7 +330,6 @@ const Index = () => {
                 </div>
                 <Button 
                   onClick={handleNext}
-                  disabled={!formData.vehicleCount}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -247,6 +337,7 @@ const Index = () => {
               </div>
             )}
 
+            {/* Step 3: Vehicle Year */}
             {currentStep === 3 && (
               <div className="text-center space-y-6">
                 <h1 className="text-2xl font-bold text-gray-900">Select your vehicle year</h1>
@@ -254,10 +345,10 @@ const Index = () => {
                   {Array.from({ length: 28 }, (_, i) => 2025 - i).map((year) => (
                     <Button
                       key={year}
-                      variant={formData.vehicleYear === year.toString() ? "default" : "outline"}
-                      onClick={() => updateFormData('vehicleYear', year.toString())}
+                      variant={formData.vehicles[0].year === year.toString() ? "default" : "outline"}
+                      onClick={() => updateVehicle(0, 'year', year.toString())}
                       className={`h-12 ${
-                        formData.vehicleYear === year.toString()
+                        formData.vehicles[0].year === year.toString()
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
@@ -268,7 +359,7 @@ const Index = () => {
                 </div>
                 <Button 
                   onClick={handleNext}
-                  disabled={!formData.vehicleYear}
+                  disabled={!formData.vehicles[0].year}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -276,20 +367,18 @@ const Index = () => {
               </div>
             )}
 
+            {/* Step 4: Vehicle Make */}
             {currentStep === 4 && (
               <div className="text-center space-y-6">
-                <div className="text-left mb-4">
-                  <span className="text-sm text-gray-500">{formData.vehicleYear}</span>
-                </div>
                 <h1 className="text-2xl font-bold text-gray-900">Select your vehicle make</h1>
                 <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
-                  {vehicleMakes.map((make) => (
+                  {['BMW', 'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'Hyundai', 'Kia'].map((make) => (
                     <Button
                       key={make}
-                      variant={formData.vehicleMake === make ? "default" : "outline"}
-                      onClick={() => updateFormData('vehicleMake', make)}
+                      variant={formData.vehicles[0].make === make ? "default" : "outline"}
+                      onClick={() => updateVehicle(0, 'make', make)}
                       className={`h-16 flex items-center justify-center gap-3 ${
-                        formData.vehicleMake === make
+                        formData.vehicles[0].make === make
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
@@ -301,7 +390,7 @@ const Index = () => {
                 </div>
                 <Button 
                   onClick={handleNext}
-                  disabled={!formData.vehicleMake}
+                  disabled={!formData.vehicles[0].make}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -309,31 +398,102 @@ const Index = () => {
               </div>
             )}
 
+            {/* Step 5: Vehicle Model */}
             {currentStep === 5 && (
               <div className="text-center space-y-6">
-                <div className="text-left mb-4">
-                  <span className="text-sm text-gray-500">{formData.vehicleYear} {formData.vehicleMake}</span>
-                </div>
                 <h1 className="text-2xl font-bold text-gray-900">Select your vehicle model</h1>
-                <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
-                  {(formData.vehicleMake === 'BMW' ? bmwModels : ['Model 1', 'Model 2', 'Model 3', 'Model 4']).map((model) => (
+                <div className="space-y-4 max-w-md mx-auto">
+                  <Input
+                    placeholder="Enter vehicle model"
+                    value={formData.vehicles[0].model}
+                    onChange={(e) => updateVehicle(0, 'model', e.target.value)}
+                    className="text-center"
+                  />
+                  <Button 
+                    onClick={handleNext}
+                    disabled={!formData.vehicles[0].model}
+                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 6: Vehicle Details */}
+            {currentStep === 6 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">Vehicle Details</h1>
+                <div className="space-y-4 max-w-md mx-auto">
+                  <Select onValueChange={(value) => updateVehicle(0, 'ownedOrLeased', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Owned or Leased?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Owned">Owned</SelectItem>
+                      <SelectItem value="Leased">Leased</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select onValueChange={(value) => updateVehicle(0, 'vehicleUse', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Primary use?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pleasure">Pleasure</SelectItem>
+                      <SelectItem value="Commute_Work">Commute to Work</SelectItem>
+                      <SelectItem value="Commute_School">Commute to School</SelectItem>
+                      <SelectItem value="Business">Business</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select onValueChange={(value) => updateVehicle(0, 'annualMiles', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Annual miles driven?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5000">Under 5,000</SelectItem>
+                      <SelectItem value="7500">5,000 - 10,000</SelectItem>
+                      <SelectItem value="12500">10,000 - 15,000</SelectItem>
+                      <SelectItem value="20000">15,000 - 25,000</SelectItem>
+                      <SelectItem value="50000">Over 25,000</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    onClick={handleNext}
+                    disabled={!formData.vehicles[0].ownedOrLeased || !formData.vehicles[0].vehicleUse}
+                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 7: Driver Gender */}
+            {currentStep === 7 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">What is your gender?</h1>
+                <div className="flex gap-4 max-w-md mx-auto">
+                  {['Male', 'Female'].map((gender) => (
                     <Button
-                      key={model}
-                      variant={formData.vehicleModel === model ? "default" : "outline"}
-                      onClick={() => updateFormData('vehicleModel', model)}
-                      className={`h-12 ${
-                        formData.vehicleModel === model
+                      key={gender}
+                      variant={formData.drivers[0].gender === gender ? "default" : "outline"}
+                      onClick={() => updateDriver(0, 'gender', gender)}
+                      className={`flex-1 h-16 ${
+                        formData.drivers[0].gender === gender
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
                     >
-                      {model}
+                      {gender}
                     </Button>
                   ))}
                 </div>
                 <Button 
                   onClick={handleNext}
-                  disabled={!formData.vehicleModel}
+                  disabled={!formData.drivers[0].gender}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -341,15 +501,170 @@ const Index = () => {
               </div>
             )}
 
-            {currentStep === 6 && (
+            {/* Step 8: Marital Status */}
+            {currentStep === 8 && (
               <div className="text-center space-y-6">
-                <h1 className="text-2xl font-bold text-gray-900">Have you had auto insurance in the past 30 days?</h1>
+                <h1 className="text-2xl font-bold text-gray-900">What is your marital status?</h1>
+                <div className="flex gap-4 max-w-md mx-auto">
+                  {['Single', 'Married'].map((status) => (
+                    <Button
+                      key={status}
+                      variant={formData.drivers[0].maritalStatus === status ? "default" : "outline"}
+                      onClick={() => updateDriver(0, 'maritalStatus', status)}
+                      className={`flex-1 h-16 ${
+                        formData.drivers[0].maritalStatus === status
+                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {status}
+                    </Button>
+                  ))}
+                </div>
+                <Button 
+                  onClick={handleNext}
+                  disabled={!formData.drivers[0].maritalStatus}
+                  className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                >
+                  Continue
+                </Button>
+              </div>
+            )}
+
+            {/* Step 9: Birth Date */}
+            {currentStep === 9 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">What is your birth date?</h1>
+                <div className="space-y-4 max-w-md mx-auto">
+                  <Input
+                    type="date"
+                    value={formData.drivers[0].birthDate}
+                    onChange={(e) => updateDriver(0, 'birthDate', e.target.value)}
+                    className="text-center"
+                  />
+                  <Button 
+                    onClick={handleNext}
+                    disabled={!formData.drivers[0].birthDate}
+                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 10: License Information */}
+            {currentStep === 10 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">License Information</h1>
+                <div className="space-y-4 max-w-md mx-auto">
+                  <Input
+                    type="number"
+                    placeholder="Age when first licensed"
+                    value={formData.drivers[0].ageLicensed}
+                    onChange={(e) => updateDriver(0, 'ageLicensed', e.target.value)}
+                  />
+                  
+                  <Select onValueChange={(value) => updateDriver(0, 'licenseStatus', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="License status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Valid">Valid</SelectItem>
+                      <SelectItem value="Permit">Permit</SelectItem>
+                      <SelectItem value="Expired">Expired</SelectItem>
+                      <SelectItem value="Suspended">Suspended</SelectItem>
+                      <SelectItem value="Revoked">Revoked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    onClick={handleNext}
+                    disabled={!formData.drivers[0].ageLicensed || !formData.drivers[0].licenseStatus}
+                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 11: Education & Occupation */}
+            {currentStep === 11 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">Education & Occupation</h1>
+                <div className="space-y-4 max-w-md mx-auto">
+                  <Select onValueChange={(value) => updateDriver(0, 'education', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Highest education level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="High School">High School</SelectItem>
+                      <SelectItem value="Some College">Some College</SelectItem>
+                      <SelectItem value="Associate">Associate Degree</SelectItem>
+                      <SelectItem value="Bachelor">Bachelor's Degree</SelectItem>
+                      <SelectItem value="Master">Master's Degree</SelectItem>
+                      <SelectItem value="PhD">PhD/Doctorate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Input
+                    placeholder="Occupation"
+                    value={formData.drivers[0].occupation}
+                    onChange={(e) => updateDriver(0, 'occupation', e.target.value)}
+                  />
+                  
+                  <Button 
+                    onClick={handleNext}
+                    disabled={!formData.drivers[0].education || !formData.drivers[0].occupation}
+                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 12: Credit Rating */}
+            {currentStep === 12 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">How would you rate your credit?</h1>
+                <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                  {['Excellent', 'Good', 'Some Problems', 'Major Problems'].map((rating) => (
+                    <Button
+                      key={rating}
+                      variant={formData.drivers[0].creditRating === rating ? "default" : "outline"}
+                      onClick={() => updateDriver(0, 'creditRating', rating)}
+                      className={`h-12 ${
+                        formData.drivers[0].creditRating === rating
+                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {rating}
+                    </Button>
+                  ))}
+                </div>
+                <Button 
+                  onClick={handleNext}
+                  disabled={!formData.drivers[0].creditRating}
+                  className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
+                >
+                  Continue
+                </Button>
+              </div>
+            )}
+
+            {/* Step 13: Current Insurance */}
+            {currentStep === 13 && (
+              <div className="text-center space-y-6">
+                <h1 className="text-2xl font-bold text-gray-900">Do you currently have auto insurance?</h1>
                 <div className="flex gap-4 max-w-md mx-auto">
                   <Button
-                    variant={formData.hasRecentInsurance === true ? "default" : "outline"}
-                    onClick={() => updateFormData('hasRecentInsurance', true)}
+                    variant={formData.hasCurrentInsurance === true ? "default" : "outline"}
+                    onClick={() => updateFormData('hasCurrentInsurance', true)}
                     className={`flex-1 h-16 ${
-                      formData.hasRecentInsurance === true
+                      formData.hasCurrentInsurance === true
                         ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                         : 'hover:bg-gray-50'
                     }`}
@@ -357,10 +672,10 @@ const Index = () => {
                     Yes
                   </Button>
                   <Button
-                    variant={formData.hasRecentInsurance === false && formData.currentInsurer !== '' ? "default" : "outline"}
-                    onClick={() => updateFormData('hasRecentInsurance', false)}
+                    variant={formData.hasCurrentInsurance === false ? "default" : "outline"}
+                    onClick={() => updateFormData('hasCurrentInsurance', false)}
                     className={`flex-1 h-16 ${
-                      formData.hasRecentInsurance === false && formData.currentInsurer !== ''
+                      formData.hasCurrentInsurance === false
                         ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                         : 'hover:bg-gray-50'
                     }`}
@@ -370,7 +685,7 @@ const Index = () => {
                 </div>
                 <Button 
                   onClick={handleNext}
-                  disabled={formData.hasRecentInsurance === null}
+                  disabled={formData.hasCurrentInsurance === null}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -378,36 +693,29 @@ const Index = () => {
               </div>
             )}
 
-            {currentStep === 7 && formData.hasRecentInsurance && (
+            {/* Step 14: Coverage Type */}
+            {currentStep === 14 && (
               <div className="text-center space-y-6">
-                <h1 className="text-2xl font-bold text-gray-900">Select your current auto insurance</h1>
-                <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
-                  {insurers.map((insurer) => (
+                <h1 className="text-2xl font-bold text-gray-900">What type of coverage do you need?</h1>
+                <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                  {['Premium', 'Standard', 'Preferred', 'State_Min'].map((coverage) => (
                     <Button
-                      key={insurer}
-                      variant={formData.currentInsurer === insurer ? "default" : "outline"}
-                      onClick={() => updateFormData('currentInsurer', insurer)}
+                      key={coverage}
+                      variant={formData.coverageType === coverage ? "default" : "outline"}
+                      onClick={() => updateFormData('coverageType', coverage)}
                       className={`h-12 ${
-                        formData.currentInsurer === insurer
+                        formData.coverageType === coverage
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
                     >
-                      {insurer}
+                      {coverage.replace('_', ' ')}
                     </Button>
                   ))}
                 </div>
-                <Select onValueChange={(value) => updateFormData('currentInsurer', value)}>
-                  <SelectTrigger className="w-full max-w-sm mx-auto">
-                    <SelectValue placeholder="Select other carrier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="other">Other carrier</SelectItem>
-                  </SelectContent>
-                </Select>
                 <Button 
                   onClick={handleNext}
-                  disabled={!formData.currentInsurer}
+                  disabled={!formData.coverageType}
                   className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-12"
                 >
                   Continue
@@ -415,37 +723,55 @@ const Index = () => {
               </div>
             )}
 
-            {currentStep === 8 && (
+            {/* Step 15: Contact Information */}
+            {currentStep === 15 && (
               <div className="text-center space-y-6">
                 <h1 className="text-2xl font-bold text-gray-900">Enter your contact information</h1>
                 <div className="space-y-4 max-w-md mx-auto">
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="First Name"
-                      value={formData.personalInfo.firstName}
-                      onChange={(e) => updatePersonalInfo('firstName', e.target.value)}
+                      value={formData.firstName}
+                      onChange={(e) => updateFormData('firstName', e.target.value)}
                     />
                     <Input
                       placeholder="Last Name"
-                      value={formData.personalInfo.lastName}
-                      onChange={(e) => updatePersonalInfo('lastName', e.target.value)}
+                      value={formData.lastName}
+                      onChange={(e) => updateFormData('lastName', e.target.value)}
+                    />
+                  </div>
+                  <Input
+                    placeholder="Address"
+                    value={formData.address1}
+                    onChange={(e) => updateFormData('address1', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={(e) => updateFormData('city', e.target.value)}
+                    />
+                    <Input
+                      placeholder="State"
+                      value={formData.state}
+                      onChange={(e) => updateFormData('state', e.target.value)}
                     />
                   </div>
                   <Input
                     type="email"
                     placeholder="Email Address"
-                    value={formData.personalInfo.email}
-                    onChange={(e) => updatePersonalInfo('email', e.target.value)}
+                    value={formData.emailAddress}
+                    onChange={(e) => updateFormData('emailAddress', e.target.value)}
                   />
                   <Input
                     type="tel"
                     placeholder="Phone Number"
-                    value={formData.personalInfo.phone}
-                    onChange={(e) => updatePersonalInfo('phone', e.target.value)}
+                    value={formData.phoneNumber}
+                    onChange={(e) => updateFormData('phoneNumber', e.target.value)}
                   />
                   <Button 
                     onClick={handleSubmit}
-                    disabled={!formData.personalInfo.firstName || !formData.personalInfo.lastName || !formData.personalInfo.email || !formData.personalInfo.phone}
+                    disabled={!formData.firstName || !formData.lastName || !formData.emailAddress || !formData.phoneNumber}
                     className="w-full bg-[#6FD0BD] hover:bg-[#5bc0a8] text-white h-12"
                   >
                     Get My Quotes
