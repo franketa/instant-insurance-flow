@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Help, X } from 'lucide-react';
+import { ArrowLeft, HelpCircle, X } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
@@ -181,7 +181,7 @@ const Index = () => {
           </Button>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" className="flex items-center gap-2">
-              <Help className="h-4 w-4" />
+              <HelpCircle className="h-4 w-4" />
               Help
             </Button>
             <Button variant="ghost" size="sm">
