@@ -318,7 +318,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm p-4 sm:p-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-[10px]">
@@ -366,15 +366,15 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Form Content */}
-      <div className="flex-1 p-2 sm:p-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="p-4 sm:p-8">
+      {/* Form Content - Takes remaining height */}
+      <div className="flex-1 flex flex-col p-2 sm:p-4">
+        <div className="max-w-2xl mx-auto flex-1 flex flex-col">
+          <Card className="p-4 sm:p-8 flex-1 flex flex-col justify-center">
             {/* Step 1: ZIP Code */}
             {currentStep === 1 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Enter your ZIP code</h1>
-                <div className="max-w-sm mx-auto space-y-4">
+              <div className="text-center space-y-6 sm:space-y-8 flex-1 flex flex-col justify-center">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Enter Zip Code</h1>
+                <div className="max-w-sm mx-auto space-y-6">
                   <Input
                     type="text"
                     placeholder="66200"
@@ -383,13 +383,13 @@ const Index = () => {
                       const value = e.target.value.replace(/\D/g, '').slice(0, 5);
                       updateFormData('zipCode', value);
                     }}
-                    className="text-center text-base sm:text-lg h-10 sm:h-12"
+                    className="text-center text-lg sm:text-xl h-16 sm:h-20 text-gray-700 border-2 border-gray-200 focus:border-[#467FCE]"
                     maxLength={5}
                   />
                   <Button 
                     onClick={handleNext}
                     disabled={formData.zipCode.length !== 5}
-                    className="w-full bg-transparent border-[2px] border-[#467FCE] hover:bg-[#3a6bb8] text-[#467FCE] h-10 sm:h-12 text-sm sm:text-base"
+                    className="w-full bg-transparent border-[2px] border-[#467FCE] hover:bg-[#467FCE] text-[#467FCE] hover:text-white h-16 sm:h-20 text-lg sm:text-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     CHECK RATES
                   </Button>
