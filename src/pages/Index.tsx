@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,6 +83,9 @@ interface FormData {
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [currentVehicleIndex, setCurrentVehicleIndex] = useState(0);
+  const [vehicleStepType, setVehicleStepType] = useState<'year' | 'make' | 'model'>('year');
+  
   const [formData, setFormData] = useState<FormData>({
     // Contact
     zipCode: '',
@@ -150,7 +152,13 @@ const Index = () => {
     isHomeowner: false
   });
 
-  const totalSteps = 17; // Updated to include new steps
+  // Calculate total steps dynamically based on vehicle count
+  const getVehicleSteps = () => {
+    const vehicleCount = Math.min(formData.vehicleCount, 2); // Max 2 vehicles
+    return vehicleCount * 3; // 3 steps per vehicle (year, make, model)
+  };
+
+  const totalSteps = 11 + getVehicleSteps(); // Base steps + vehicle steps
   const progress = (currentStep / totalSteps) * 100;
 
   const handleNext = () => {
@@ -214,14 +222,77 @@ const Index = () => {
     }));
   };
 
-  // Auto-advance function for selection steps
+  // Enhanced selection and advance function for vehicle steps
   const handleSelectionAndAdvance = (field: string, value: any, updateFunction?: (field: string, value: any) => void) => {
     if (updateFunction) {
       updateFunction(field, value);
     } else {
       updateFormData(field, value);
     }
-    setTimeout(() => handleNext(), 300); // Small delay for visual feedback
+
+    // Handle vehicle count selection
+    if (field === 'vehicleCount') {
+      const actualCount = Math.min(value, 2); // Limit to 2 vehicles
+      // Initialize vehicles array based on count
+      const newVehicles = Array.from({ length: actualCount }, (_, i) => 
+        formData.vehicles[i] || {
+          year: '',
+          make: '',
+          model: '',
+          submodel: '',
+          vinPrefix: '',
+          locationParked: '',
+          ownedOrLeased: '',
+          vehicleUse: '',
+          annualMiles: '',
+          weeklyCommuteDays: '',
+          oneWayDistance: ''
+        }
+      );
+      setFormData(prev => ({ ...prev, vehicles: newVehicles }));
+      setCurrentVehicleIndex(0);
+      setVehicleStepType('year');
+    }
+
+    // Handle vehicle step progression
+    if (currentStep >= 3 && currentStep <= 2 + getVehicleSteps()) {
+      if (vehicleStepType === 'year') {
+        setVehicleStepType('make');
+      } else if (vehicleStepType === 'make') {
+        setVehicleStepType('model');
+      } else if (vehicleStepType === 'model') {
+        // Move to next vehicle or next section
+        if (currentVehicleIndex < Math.min(formData.vehicleCount, 2) - 1) {
+          setCurrentVehicleIndex(currentVehicleIndex + 1);
+          setVehicleStepType('year');
+        }
+      }
+    }
+
+    setTimeout(() => handleNext(), 300);
+  };
+
+  // Function to get current vehicle step info
+  const getCurrentVehicleStepInfo = () => {
+    const vehicleNumber = currentVehicleIndex + 1;
+    const isFirstVehicle = vehicleNumber === 1;
+    const prefix = isFirstVehicle ? 'First' : 'Second';
+    
+    switch (vehicleStepType) {
+      case 'year':
+        return `${prefix} vehicle year`;
+      case 'make':
+        return `${prefix} vehicle make`;
+      case 'model':
+        return `${prefix} vehicle model`;
+      default:
+        return 'Vehicle information';
+    }
+  };
+
+  // Function to check if current step is a vehicle step
+  const isVehicleStep = () => {
+    return currentStep >= 3 && currentStep <= 2 + getVehicleSteps();
   };
 
   if (isSubmitted) {
@@ -308,12 +379,16 @@ const Index = () => {
                     type="text"
                     placeholder="66200"
                     value={formData.zipCode}
-                    onChange={(e) => updateFormData('zipCode', e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                      updateFormData('zipCode', value);
+                    }}
                     className="text-center text-base sm:text-lg h-10 sm:h-12"
+                    maxLength={5}
                   />
                   <Button 
                     onClick={handleNext}
-                    disabled={!formData.zipCode}
+                    disabled={formData.zipCode.length !== 5}
                     className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
                   >
                     CHECK RATES
@@ -345,78 +420,78 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 3: Vehicle Year */}
-            {currentStep === 3 && (
+            {/* Vehicle Steps (Dynamic based on vehicle count) */}
+            {isVehicleStep() && (
               <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Select your vehicle year</h1>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
-                  {Array.from({ length: 28 }, (_, i) => 2025 - i).map((year) => (
-                    <Button
-                      key={year}
-                      variant={formData.vehicles[0].year === year.toString() ? "default" : "outline"}
-                      onClick={() => handleSelectionAndAdvance('year', year.toString(), (field, value) => updateVehicle(0, field, value))}
-                      className={`h-10 sm:h-12 text-sm sm:text-base ${
-                        formData.vehicles[0].year === year.toString()
-                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      {year}
-                    </Button>
-                  ))}
-                </div>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 capitalize">
+                  Select your {getCurrentVehicleStepInfo()}
+                </h1>
+                
+                {/* Vehicle Year */}
+                {vehicleStepType === 'year' && (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
+                    {Array.from({ length: 28 }, (_, i) => 2025 - i).map((year) => (
+                      <Button
+                        key={year}
+                        variant={formData.vehicles[currentVehicleIndex]?.year === year.toString() ? "default" : "outline"}
+                        onClick={() => handleSelectionAndAdvance('year', year.toString(), (field, value) => updateVehicle(currentVehicleIndex, field, value))}
+                        className={`h-10 sm:h-12 text-sm sm:text-base ${
+                          formData.vehicles[currentVehicleIndex]?.year === year.toString()
+                            ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {year}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Vehicle Make */}
+                {vehicleStepType === 'make' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
+                    {['BMW', 'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'Hyundai', 'Kia'].map((make) => (
+                      <Button
+                        key={make}
+                        variant={formData.vehicles[currentVehicleIndex]?.make === make ? "default" : "outline"}
+                        onClick={() => handleSelectionAndAdvance('make', make, (field, value) => updateVehicle(currentVehicleIndex, field, value))}
+                        className={`h-12 sm:h-16 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base ${
+                          formData.vehicles[currentVehicleIndex]?.make === make
+                            ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-lg sm:text-2xl">🚗</span>
+                        {make}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Vehicle Model */}
+                {vehicleStepType === 'model' && (
+                  <div className="grid grid-cols-1 gap-2 sm:gap-3 max-w-md mx-auto">
+                    {['Camry', 'Civic', 'Accord'].map((model) => (
+                      <Button
+                        key={model}
+                        variant={formData.vehicles[currentVehicleIndex]?.model === model ? "default" : "outline"}
+                        onClick={() => handleSelectionAndAdvance('model', model, (field, value) => updateVehicle(currentVehicleIndex, field, value))}
+                        className={`h-12 sm:h-16 text-sm sm:text-base ${
+                          formData.vehicles[currentVehicleIndex]?.model === model
+                            ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {model}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Step 4: Vehicle Make */}
-            {currentStep === 4 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Select your vehicle make</h1>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
-                  {['BMW', 'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'Hyundai', 'Kia'].map((make) => (
-                    <Button
-                      key={make}
-                      variant={formData.vehicles[0].make === make ? "default" : "outline"}
-                      onClick={() => handleSelectionAndAdvance('make', make, (field, value) => updateVehicle(0, field, value))}
-                      className={`h-12 sm:h-16 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base ${
-                        formData.vehicles[0].make === make
-                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="text-lg sm:text-2xl">🚗</span>
-                      {make}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Step 5: Vehicle Model */}
-            {currentStep === 5 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Select your vehicle model</h1>
-                <div className="grid grid-cols-1 gap-2 sm:gap-3 max-w-md mx-auto">
-                  {['Camry', 'Civic', 'Accord'].map((model) => (
-                    <Button
-                      key={model}
-                      variant={formData.vehicles[0].model === model ? "default" : "outline"}
-                      onClick={() => handleSelectionAndAdvance('model', model, (field, value) => updateVehicle(0, field, value))}
-                      className={`h-12 sm:h-16 text-sm sm:text-base ${
-                        formData.vehicles[0].model === model
-                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      {model}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Step 6: Insurance Past 30 Days */}
-            {currentStep === 6 && (
+            {/* Step: Insurance Past 30 Days */}
+            {currentStep === 3 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Have you had auto insurance in the past 30 days?</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
@@ -446,18 +521,18 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 7: Vehicle Ownership */}
-            {currentStep === 7 && (
+            {/* Step: Vehicle Ownership */}
+            {currentStep === 4 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Is this vehicle owned, financed or leased?</h1>
                 <div className="grid grid-cols-1 gap-2 sm:gap-3 max-w-md mx-auto">
                   {['Owned', 'Financed', 'Leased'].map((option) => (
                     <Button
                       key={option}
-                      variant={formData.vehicles[0].ownedOrLeased === option ? "default" : "outline"}
+                      variant={formData.vehicles[0]?.ownedOrLeased === option ? "default" : "outline"}
                       onClick={() => handleSelectionAndAdvance('ownedOrLeased', option, (field, value) => updateVehicle(0, field, value))}
                       className={`h-12 sm:h-16 text-sm sm:text-base ${
-                        formData.vehicles[0].ownedOrLeased === option
+                        formData.vehicles[0]?.ownedOrLeased === option
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
@@ -469,18 +544,18 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 8: Driver Gender */}
-            {currentStep === 8 && (
+            {/* Step: Driver Gender */}
+            {currentStep === 5 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Select your gender</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
                   {['Male', 'Female'].map((gender) => (
                     <Button
                       key={gender}
-                      variant={formData.drivers[0].gender === gender ? "default" : "outline"}
+                      variant={formData.drivers[0]?.gender === gender ? "default" : "outline"}
                       onClick={() => handleSelectionAndAdvance('gender', gender, (field, value) => updateDriver(0, field, value))}
                       className={`flex-1 h-12 sm:h-16 text-sm sm:text-base ${
-                        formData.drivers[0].gender === gender
+                        formData.drivers[0]?.gender === gender
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
@@ -492,18 +567,18 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 9: Marital Status */}
-            {currentStep === 9 && (
+            {/* Step: Marital Status */}
+            {currentStep === 6 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Are you married?</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
                   {['Yes', 'No'].map((status) => (
                     <Button
                       key={status}
-                      variant={formData.drivers[0].maritalStatus === status ? "default" : "outline"}
+                      variant={formData.drivers[0]?.maritalStatus === status ? "default" : "outline"}
                       onClick={() => handleSelectionAndAdvance('maritalStatus', status, (field, value) => updateDriver(0, field, value))}
                       className={`flex-1 h-12 sm:h-16 text-sm sm:text-base ${
-                        formData.drivers[0].maritalStatus === status
+                        formData.drivers[0]?.maritalStatus === status
                           ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                           : 'hover:bg-gray-50'
                       }`}
@@ -515,8 +590,8 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 10: Homeowner */}
-            {currentStep === 10 && (
+            {/* Step: Homeowner */}
+            {currentStep === 7 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Homeowner?</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
@@ -546,20 +621,20 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 11: Birth Date */}
-            {currentStep === 11 && (
+            {/* Step: Birth Date */}
+            {currentStep === 8 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">What is your birth date?</h1>
                 <div className="space-y-4 max-w-md mx-auto">
                   <Input
                     type="date"
-                    value={formData.drivers[0].birthDate}
+                    value={formData.drivers[0]?.birthDate || ''}
                     onChange={(e) => updateDriver(0, 'birthDate', e.target.value)}
                     className="text-center text-sm sm:text-base"
                   />
                   <Button 
                     onClick={handleNext}
-                    disabled={!formData.drivers[0].birthDate}
+                    disabled={!formData.drivers[0]?.birthDate}
                     className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
                   >
                     Continue
@@ -568,8 +643,8 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 12: Driving Incidents */}
-            {currentStep === 12 && (
+            {/* Step: Driving Incidents */}
+            {currentStep === 9 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Have you had any driving incidents in the last 3 years?</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
@@ -599,16 +674,16 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 13: Military Affiliation */}
-            {currentStep === 13 && (
+            {/* Step: Military Affiliation */}
+            {currentStep === 10 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Are either you or your spouse an active member, or an honorably discharged veteran of the US military?</h1>
                 <div className="flex gap-2 sm:gap-4 max-w-md mx-auto">
                   <Button
-                    variant={formData.drivers[0].hasMilitaryAffiliation === 'Yes' ? "default" : "outline"}
+                    variant={formData.drivers[0]?.hasMilitaryAffiliation === 'Yes' ? "default" : "outline"}
                     onClick={() => handleSelectionAndAdvance('hasMilitaryAffiliation', 'Yes', (field, value) => updateDriver(0, field, value))}
                     className={`flex-1 h-12 sm:h-16 text-sm sm:text-base ${
-                      formData.drivers[0].hasMilitaryAffiliation === 'Yes'
+                      formData.drivers[0]?.hasMilitaryAffiliation === 'Yes'
                         ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                         : 'hover:bg-gray-50'
                     }`}
@@ -616,10 +691,10 @@ const Index = () => {
                     Yes
                   </Button>
                   <Button
-                    variant={formData.drivers[0].hasMilitaryAffiliation === 'No' ? "default" : "outline"}
+                    variant={formData.drivers[0]?.hasMilitaryAffiliation === 'No' ? "default" : "outline"}
                     onClick={() => handleSelectionAndAdvance('hasMilitaryAffiliation', 'No', (field, value) => updateDriver(0, field, value))}
                     className={`flex-1 h-12 sm:h-16 text-sm sm:text-base ${
-                      formData.drivers[0].hasMilitaryAffiliation === 'No'
+                      formData.drivers[0]?.hasMilitaryAffiliation === 'No'
                         ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
                         : 'hover:bg-gray-50'
                     }`}
@@ -630,112 +705,8 @@ const Index = () => {
               </div>
             )}
 
-            {/* Step 14: License Information */}
-            {currentStep === 14 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">License Information</h1>
-                <div className="space-y-4 max-w-md mx-auto">
-                  <Input
-                    type="number"
-                    placeholder="Age when first licensed"
-                    value={formData.drivers[0].ageLicensed}
-                    onChange={(e) => updateDriver(0, 'ageLicensed', e.target.value)}
-                    className="text-sm sm:text-base"
-                  />
-                  
-                  <Select onValueChange={(value) => updateDriver(0, 'licenseStatus', value)}>
-                    <SelectTrigger className="text-sm sm:text-base">
-                      <SelectValue placeholder="License status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Valid">Valid</SelectItem>
-                      <SelectItem value="Permit">Permit</SelectItem>
-                      <SelectItem value="Expired">Expired</SelectItem>
-                      <SelectItem value="Suspended">Suspended</SelectItem>
-                      <SelectItem value="Revoked">Revoked</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Button 
-                    onClick={handleNext}
-                    disabled={!formData.drivers[0].ageLicensed || !formData.drivers[0].licenseStatus}
-                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 15: Education & Occupation */}
-            {currentStep === 15 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Education & Occupation</h1>
-                <div className="space-y-4 max-w-md mx-auto">
-                  <Select onValueChange={(value) => updateDriver(0, 'education', value)}>
-                    <SelectTrigger className="text-sm sm:text-base">
-                      <SelectValue placeholder="Highest education level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="High School">High School</SelectItem>
-                      <SelectItem value="Some College">Some College</SelectItem>
-                      <SelectItem value="Associate">Associate Degree</SelectItem>
-                      <SelectItem value="Bachelor">Bachelor's Degree</SelectItem>
-                      <SelectItem value="Master">Master's Degree</SelectItem>
-                      <SelectItem value="PhD">PhD/Doctorate</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Input
-                    placeholder="Occupation"
-                    value={formData.drivers[0].occupation}
-                    onChange={(e) => updateDriver(0, 'occupation', e.target.value)}
-                    className="text-sm sm:text-base"
-                  />
-                  
-                  <Button 
-                    onClick={handleNext}
-                    disabled={!formData.drivers[0].education || !formData.drivers[0].occupation}
-                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 16: Coverage Type */}
-            {currentStep === 16 && (
-              <div className="text-center space-y-4 sm:space-y-6">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">What type of coverage do you need?</h1>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-md mx-auto">
-                  {['Premium', 'Standard', 'Preferred', 'State_Min'].map((coverage) => (
-                    <Button
-                      key={coverage}
-                      variant={formData.coverageType === coverage ? "default" : "outline"}
-                      onClick={() => updateFormData('coverageType', coverage)}
-                      className={`h-10 sm:h-12 text-xs sm:text-sm ${
-                        formData.coverageType === coverage
-                          ? 'bg-[#467FCE] hover:bg-[#3a6bb8] text-white'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      {coverage.replace('_', ' ')}
-                    </Button>
-                  ))}
-                </div>
-                <Button 
-                  onClick={handleNext}
-                  disabled={!formData.coverageType}
-                  className="w-full max-w-md bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
-                >
-                  Continue
-                </Button>
-              </div>
-            )}
-
-            {/* Step 17: Contact Information */}
-            {currentStep === 17 && (
+            {/* Step: Contact Information */}
+            {currentStep === 11 + getVehicleSteps() && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Enter your contact information</h1>
                 <div className="space-y-4 max-w-md mx-auto">
