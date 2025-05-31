@@ -297,7 +297,7 @@ const Index = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-4 sm:p-4">
         <Card className="w-full max-w-md p-4 sm:p-8 text-center">
           <div className="mb-6">
             <img src="/lovable-uploads/ffc1c08f-f4cb-4b31-a4c8-d80f99d0d75b.png" alt="TrueQuote" className="h-8 sm:h-12 mx-auto mb-4" />
@@ -320,10 +320,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50">
       {/* Header */}
-      <div className="bg-white shadow-sm p-2 sm:p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <img src="/lovable-uploads/ffc1c08f-f4cb-4b31-a4c8-d80f99d0d75b.png" alt="TrueQuote" className="h-6 sm:h-8" />
-          <p className="text-xs sm:text-sm text-gray-600 hidden md:block">
+      <div className="bg-white shadow-sm p-4 sm:p-4">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-[10px]">
+          <img src="/lovable-uploads/ffc1c08f-f4cb-4b31-a4c8-d80f99d0d75b.png" alt="TrueQuote" className="h-8 sm:h-8" />
+          <p className="text-xs sm:text-sm text-gray-600 md:block text-center w-3xs">
             Get fast, cheap car insurance quotes with one simple form.
           </p>
         </div>
@@ -332,9 +332,9 @@ const Index = () => {
       {/* Progress Bar */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto p-2 sm:p-4">
-          <div className="flex items-center justify-between mb-2">
-            <Progress value={progress} className="flex-1 h-2" />
-            <span className="ml-2 sm:ml-4 text-xs sm:text-sm font-medium text-[#6FD0BD]">
+          <div className="flex items-end justify-between mb-2">
+            <Progress value={progress} className="h-4" />
+            <span className="ml-2 sm:ml-4 text-sm sm:text-sm font-medium text-[#6FD0BD]">
               {Math.round(progress)}% Complete
             </span>
           </div>
@@ -389,7 +389,7 @@ const Index = () => {
                   <Button 
                     onClick={handleNext}
                     disabled={formData.zipCode.length !== 5}
-                    className="w-full bg-[#467FCE] hover:bg-[#3a6bb8] text-white h-10 sm:h-12 text-sm sm:text-base"
+                    className="w-full bg-transparent border-[2px] border-[#467FCE] hover:bg-[#3a6bb8] text-[#467FCE] h-10 sm:h-12 text-sm sm:text-base"
                   >
                     CHECK RATES
                   </Button>
@@ -401,7 +401,7 @@ const Index = () => {
             {currentStep === 2 && (
               <div className="text-center space-y-4 sm:space-y-6">
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">How many vehicles will be on your policy?</h1>
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-md mx-auto">
+                <div className="grid gap-2 sm:gap-4 max-w-md mx-auto">
                   {[1, 2, 3].map((count) => (
                     <Button
                       key={count}
