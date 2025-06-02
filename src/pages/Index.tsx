@@ -169,6 +169,20 @@ const Index = () => {
 
   const handlePrevious = () => {
     if (currentStep > 1) {
+      // Handle vehicle step navigation backwards
+      if (isVehicleStep()) {
+        if (vehicleStepType === 'model') {
+          setVehicleStepType('make');
+        } else if (vehicleStepType === 'make') {
+          setVehicleStepType('year');
+        } else if (vehicleStepType === 'year') {
+          // Move to previous vehicle or previous section
+          if (currentVehicleIndex > 0) {
+            setCurrentVehicleIndex(currentVehicleIndex - 1);
+            setVehicleStepType('model');
+          }
+        }
+      }
       setCurrentStep(currentStep - 1);
     }
   };
@@ -275,8 +289,7 @@ const Index = () => {
   // Function to get current vehicle step info
   const getCurrentVehicleStepInfo = () => {
     const vehicleNumber = currentVehicleIndex + 1;
-    const isFirstVehicle = vehicleNumber === 1;
-    const prefix = isFirstVehicle ? 'First' : 'Second';
+    const prefix = vehicleNumber === 1 ? 'First' : 'Second';
     
     switch (vehicleStepType) {
       case 'year':
@@ -293,6 +306,21 @@ const Index = () => {
   // Function to check if current step is a vehicle step
   const isVehicleStep = () => {
     return currentStep >= 3 && currentStep <= 2 + getVehicleSteps();
+  };
+
+  // Function to get models based on selected make
+  const getModelsForMake = (make: string) => {
+    const modelMap: { [key: string]: string[] } = {
+      'BMW': ['BMW1', 'BMW2', 'BMW3'],
+      'Toyota': ['Toyota1', 'Toyota2', 'Toyota3'],
+      'Honda': ['Honda1', 'Honda2', 'Honda3'],
+      'Ford': ['Ford1', 'Ford2', 'Ford3'],
+      'Chevrolet': ['Chevrolet1', 'Chevrolet2', 'Chevrolet3'],
+      'Nissan': ['Nissan1', 'Nissan2', 'Nissan3'],
+      'Hyundai': ['Hyundai1', 'Hyundai2', 'Hyundai3'],
+      'Kia': ['Kia1', 'Kia2', 'Kia3']
+    };
+    return modelMap[make] || [];
   };
 
   if (isSubmitted) {
@@ -471,7 +499,7 @@ const Index = () => {
                 {/* Vehicle Model */}
                 {vehicleStepType === 'model' && (
                   <div className="grid grid-cols-1 gap-2 sm:gap-3 max-w-md mx-auto">
-                    {['Camry', 'Civic', 'Accord'].map((model) => (
+                    {getModelsForMake(formData.vehicles[currentVehicleIndex]?.make || '').map((model) => (
                       <Button
                         key={model}
                         variant={formData.vehicles[currentVehicleIndex]?.model === model ? "default" : "outline"}
