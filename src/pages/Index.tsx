@@ -351,7 +351,7 @@ const Index = () => {
       <div className="bg-white shadow-sm p-4 sm:p-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-[10px]">
           <img src="/lovable-uploads/ffc1c08f-f4cb-4b31-a4c8-d80f99d0d75b.png" alt="TrueQuote" className="h-8 sm:h-8" />
-          <h3 className="text-xs sm:text-sm text-gray-600 md:block text-center w-3xs">
+          <h3 className="text-sm sm:text-sm text-gray-600 md:block font-semibold text-center w-3xs">
             Get fast, cheap car insurance quotes with one simple form.
           </h3>
         </div>
