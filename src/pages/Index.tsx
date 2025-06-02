@@ -332,7 +332,7 @@ const Index = () => {
       {/* Progress Bar */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto p-2 sm:p-4">
-          <div className="flex items-end justify-between mb-2">
+          <div className="flex items-end justify-between flex-col mb-2">
             <Progress value={progress} className="h-4" />
             <span className="ml-2 sm:ml-4 text-sm sm:text-sm font-medium text-[#6FD0BD]">
               {Math.round(progress)}% Complete
@@ -377,7 +377,7 @@ const Index = () => {
                 <div className="max-w-sm mx-auto space-y-6">
                   <Input
                     type="text"
-                    placeholder="66200"
+                    placeholder="20004"
                     value={formData.zipCode}
                     onChange={(e) => {
                       const value = e.target.value.replace(/\D/g, '').slice(0, 5);
@@ -790,6 +790,8 @@ const Index = () => {
                   <a href="#" className="hover:text-gray-700">Contact Us</a>
                   <a href="#" className="hover:text-gray-700">Privacy Policy</a>
                   <a href="#" className="hover:text-gray-700">Terms of Use</a>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-xs text-gray-500">
                   <a href="#" className="hover:text-gray-700">Online Tracking</a>
                   <a href="#" className="hover:text-gray-700">Accessibility Statement</a>
                 </div>
