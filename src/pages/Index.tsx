@@ -770,20 +770,49 @@ const Index = () => {
             )}
           </Card>
 
-          {/* Footer */}
-          <div className="mt-4 sm:mt-8 text-center">
-            <div className="flex items-center justify-center gap-2 text-blue-600 mb-4">
-              <span className="text-xs sm:text-sm">✓</span>
-              <span className="text-xs sm:text-sm">Free quotes, secure form, competitive offers.</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <img src="/api/placeholder/80/40" alt="BBB Accredited Business" className="h-6 sm:h-8" />
-                <span className="text-xs text-gray-500 hidden sm:inline">BBB Accredited Business</span>
+          {/* Footer - Only show on first step */}
+          {currentStep === 1 && (
+            <div className="mt-4 sm:mt-8 text-center">
+              <div className="flex items-center justify-center gap-2 text-blue-600 mb-4">
+                <span className="text-xs sm:text-sm">✓</span>
+                <span className="text-xs sm:text-sm">Free quotes, secure form, competitive offers.</span>
               </div>
-              <div className="bg-[#467FCE] text-white px-2 py-1 rounded text-xs font-bold">A+</div>
+              <div className="flex items-center justify-center gap-2 sm:gap-4 mb-6">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="w-12 h-6 bg-gray-300 rounded"></div>
+                  <span className="text-xs text-gray-500 hidden sm:inline">BBB Accredited Business</span>
+                </div>
+                <div className="bg-[#467FCE] text-white px-2 py-1 rounded text-xs font-bold">A+</div>
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-xs text-gray-500">© 2025 Brand Name</p>
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-xs text-gray-500">
+                  <a href="#" className="hover:text-gray-700">Contact Us</a>
+                  <a href="#" className="hover:text-gray-700">Privacy Policy</a>
+                  <a href="#" className="hover:text-gray-700">Terms of Use</a>
+                  <a href="#" className="hover:text-gray-700">Online Tracking</a>
+                  <a href="#" className="hover:text-gray-700">Accessibility Statement</a>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Footer for other steps */}
+          {currentStep !== 1 && (
+            <div className="mt-4 sm:mt-8 text-center">
+              <div className="flex items-center justify-center gap-2 text-blue-600 mb-4">
+                <span className="text-xs sm:text-sm">✓</span>
+                <span className="text-xs sm:text-sm">Free quotes, secure form, competitive offers.</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="w-12 h-6 bg-gray-300 rounded"></div>
+                  <span className="text-xs text-gray-500 hidden sm:inline">BBB Accredited Business</span>
+                </div>
+                <div className="bg-[#467FCE] text-white px-2 py-1 rounded text-xs font-bold">A+</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
